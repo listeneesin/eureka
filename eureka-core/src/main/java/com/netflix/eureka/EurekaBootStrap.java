@@ -102,6 +102,8 @@ public class EurekaBootStrap implements ServletContextListener {
     }
 
     /**
+     * fighting!
+     *
      * Initializes Eureka, including syncing up with other Eureka peers and publishing the registry.
      *
      * @see
