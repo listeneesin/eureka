@@ -93,6 +93,7 @@ public class DefaultEurekaServerConfig implements EurekaServerConfig {
     private final DynamicStringProperty myUrl = configInstance.getStringProperty(namespace + "myUrl", null);
 
     public DefaultEurekaServerConfig() {
+        //构造函数执行init方法，我们点进去看一看
         init();
     }
 
@@ -101,16 +102,27 @@ public class DefaultEurekaServerConfig implements EurekaServerConfig {
         init();
     }
 
+    /**
+     * 这个方法就是Eureka-server配置信息初始化的方法
+     */
     private void init() {
+        //这里环境信息的来源，其实就是我们之前初始化Eureka-server环境配置方法中的那个单例的、线程安全的、复合的、配置实例
         String env = ConfigurationManager.getConfigInstance().getString(
                 EUREKA_ENVIRONMENT, TEST);
+        //初始化环境信息
         ConfigurationManager.getConfigInstance().setProperty(
                 ARCHAIUS_DEPLOYMENT_ENVIRONMENT, env);
-
+        //这里获取eureka-server配置文件名
         String eurekaPropsFile = EUREKA_PROPS_FILE.get();
         try {
             // ConfigurationManager
             // .loadPropertiesFromResources(eurekaPropsFile);
+            /**
+             * 猜测：这顺着逻辑就应该是根据这个配置文件名，加载配置文件配置，然后放入内存（类变量）中保存
+             * 实际：确实如此，我们点击去方法看其实就是根据传入的文件名+获取的环境读取这个配置文件中的kv值到properties中
+             * 然后创建一个配置对象保存这些properties信息，然后把它放到那个单例的、线程安全的、复合的、大的配置实例中去
+             *
+             */
             ConfigurationManager
                     .loadCascadedPropertiesFromResources(eurekaPropsFile);
         } catch (IOException e) {

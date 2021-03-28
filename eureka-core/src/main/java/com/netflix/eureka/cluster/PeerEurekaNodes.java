@@ -84,6 +84,7 @@ public class PeerEurekaNodes {
                 }
         );
         try {
+            //这个方法点进去，看看注释就知道干啥了，无非是摘除长时间无法连接的eureka的实例（server实例？），添加新实例
             updatePeerEurekaNodes(resolvePeerUrls());
             Runnable peersUpdateTask = new Runnable() {
                 @Override

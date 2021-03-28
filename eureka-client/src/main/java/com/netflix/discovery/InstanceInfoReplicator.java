@@ -60,9 +60,16 @@ class InstanceInfoReplicator implements Runnable {
         logger.info("InstanceInfoReplicator onDemand update allowed rate per min is {}", allowedRatePerMinute);
     }
 
+    /**
+     * InstanceInfoReplicator这个类实现了Runnable接口，等于说它是要被当成一个线程去线程池调度执行的
+     * @param initialDelayMs
+     */
     public void start(int initialDelayMs) {
+        //构造InstanceInfoReplicator的时候默认false,cas防并发
         if (started.compareAndSet(false, true)) {
+            //由于注册是异步，所以先设定一个状态为 Dirty
             instanceInfo.setIsDirty();  // for initial register
+            //提交该线程,延迟initialDelayMs,执行run方法
             Future next = scheduler.schedule(this, initialDelayMs, TimeUnit.SECONDS);
             scheduledPeriodicRef.set(next);
         }
@@ -112,13 +119,19 @@ class InstanceInfoReplicator implements Runnable {
         }
     }
 
+    /**
+     * 这个方法是该线程被线程池提交执行具体逻辑的方法
+     */
     public void run() {
         try {
+            //刷新InstanceInfo
             discoveryClient.refreshInstanceInfo();
-
+            //如果InstanceInfo为ture,获取设置dirty的时间
             Long dirtyTimestamp = instanceInfo.isDirtyWithTime();
             if (dirtyTimestamp != null) {
+                //真正向eureka-server注册的方法
                 discoveryClient.register();
+                //注册完成设置为unDirty
                 instanceInfo.unsetIsDirty(dirtyTimestamp);
             }
         } catch (Throwable t) {

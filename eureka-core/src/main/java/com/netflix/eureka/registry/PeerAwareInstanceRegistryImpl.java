@@ -151,6 +151,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     public void init(PeerEurekaNodes peerEurekaNodes) throws Exception {
         this.numberOfReplicationsLastMin.start();
         this.peerEurekaNodes = peerEurekaNodes;
+        //初始化ResponseCache
         initializedResponseCache();
         scheduleRenewalThresholdUpdateTask();
         initRemoteRegionRegistry();
@@ -201,6 +202,8 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     }
 
     /**
+     * 从对等的eureka节点填充注册表信息。如果通信失败，此操作将转移到其他节点，直到列表耗尽
+     *
      * Populates the registry information from a peer eureka node. This
      * operation fails over to other nodes until the list is exhausted if the
      * communication fails.
